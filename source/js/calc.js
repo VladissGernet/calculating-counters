@@ -1,37 +1,75 @@
-const elecConst = 5.04;
-document.getElementById("elec").textContent = elecConst.toString();
-const gasConst = 6.42;
-document.getElementById("gas").textContent = gasConst.toString();
-const waterConst = 41.17;
-document.getElementById("water").textContent = waterConst.toString();
-
-let elecInputBefore = document.getElementById("calc-elec-before");
-let elecInputAfter = document.getElementById("calc-elec-after");
-let gasInputBefore = document.getElementById("calc-gas-before");
-let gasInputAfter = document.getElementById("calc-gas-after");
-let waterInputBefore = document.getElementById("calc-water-before");
-let waterInputAfter = document.getElementById("calc-water-after");
-
-let elecResult = document.getElementById("calc-elec-result");
-let gasResult = document.getElementById("calc-gas-result");
-let waterResult = document.getElementById("calc-water-result");
-let resultTotal = document.querySelector(".calc-form__total-result");
-
-let buttonTotal = document.querySelector(".calc-form__button");
-
-buttonTotal.onclick = function () {
-  let calcTotal = 0;
-  let calculation = function(after, before, constValue, result) {
-    let calcValues = (after - before) * constValue;
-    calcTotal += calcValues;
-    result.style.color = (calcValues < 0 ? "red" : "black");
-    return result.textContent = (calcValues.toFixed(2)).toString() + " руб.";
-  }
-
-  let elecCalc = calculation(elecInputAfter.value, elecInputBefore.value, elecConst, elecResult);
-  let gasCalc = calculation(gasInputAfter.value, gasInputBefore.value, gasConst, gasResult);
-  let waterCalc = calculation(waterInputAfter.value, waterInputBefore.value, waterConst, waterResult);
-
-  resultTotal.style.color = (calcTotal < 0 ? "red" : "black");
-  resultTotal.textContent = (calcTotal.toFixed(2)).toString() + " руб.";
+const Services = {
+  electricity: 5.48,
+  gas: 7.13,
+  water: 44.88
 }
+
+const servicesList = document.querySelector('.calc__list')
+const servicesItems = servicesList.querySelectorAll('.calc__amount')
+
+const form = document.querySelector('.calc-form');
+const formSets = form.querySelectorAll('.calc-form__set');
+const formTotalResult = form.querySelector('.calc-form__total-result');
+
+// Установка значений.
+servicesItems.forEach((item) => {
+  item.textContent = Services[item.getAttribute('id')];
+});
+
+// Проверка показания.
+const checkInput = (input) => {
+  if (input.value.length === 0) {
+    input.value = '0';
+  }
+};
+
+// Формула расчета.
+const calcValue = (before, after, setName) => (Number(after) - Number(before)) * Services[setName];
+
+// Перевод в строку.
+const translateToString = (value) => (value.toFixed(2)).toString() + " руб.";
+
+// Проверка значения.
+const validateValue = (result, content) => {
+  if (result < 0) {
+    content.style.color = '#ff0000';
+  } else {
+    content.style.color = '#000000';
+  }
+};
+
+// Расчет каждого значения.
+const calcSet = (item) => {
+  const inputBefore = item.querySelector('.js-input-before');
+  const inputAfter = item.querySelector('.js-input-after');
+  const setTotal = item.querySelector('.js-result');
+
+  checkInput(inputBefore);
+  checkInput(inputAfter);
+
+  const result = calcValue(inputBefore.value, inputAfter.value, item.dataset.set);
+
+  validateValue(result, setTotal);
+
+  setTotal.textContent = translateToString(result);
+
+  return result;
+};
+
+// Расчет всех значений.
+const calcTotalSum = (items) => {
+  let totalSum = 0;
+  items.forEach((set) => {
+    totalSum += calcSet(set);
+  });
+  formTotalResult.textContent = translateToString(totalSum);
+  validateValue(totalSum, formTotalResult);
+};
+
+// Обработка формы.
+const onSubmit = (evt) => {
+  evt.preventDefault();
+  calcTotalSum(formSets);
+};
+
+form.addEventListener('submit', onSubmit);
