@@ -47,7 +47,7 @@
     "source/scss/**/*.scss"
   ],
   "engines": {
-    "node": "^16"
+    "node": "16.20.2"
   },
   "type": "module"
 }
